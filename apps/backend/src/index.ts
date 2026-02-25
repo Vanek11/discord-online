@@ -171,8 +171,26 @@ app.get('/config', (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 
+// Keep-alive function to prevent server from sleeping on Render.com
+function keepAlive() {
+  const healthUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  setInterval(() => {
+    try {
+      fetch(`${healthUrl}/health`).catch(() => {});
+    } catch (e) {
+      // Silently fail - it's just a keep-alive ping
+    }
+  }, 5 * 60 * 1000); // Ping every 5 minutes
+}
+
 server.listen(PORT, () => {
   console.log(`🚀 Signaling server listening on port ${PORT}`);
   console.log(`📊 Max peers per room: ${MAX_PEERS_PER_ROOM}`);
   console.log(`🌐 TURN servers configured: ${TURN_CONFIG.iceServers.length}`);
+  
+  // Start keep-alive if on Render.com
+  if (process.env.RENDER === 'true') {
+    console.log(`⏰ Keep-alive enabled (Render.com)`);
+    keepAlive();
+  }
 });

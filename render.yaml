@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: discord-online-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd apps/backend && npm install
+    startCommand: cd apps/backend && npm run dev
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: RENDER
+        value: "true"
