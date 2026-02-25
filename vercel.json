@@ -2,8 +2,5 @@
   "buildCommand": "cd apps/frontend && npm run build",
   "installCommand": "cd apps/frontend && npm install",
   "outputDirectory": "apps/frontend/.next",
-  "framework": "nextjs",
-  "env": {
-    "NEXT_PUBLIC_SIGNALING_URL": "ws://localhost:3001"
-  }
+  "framework": "nextjs"
 }
