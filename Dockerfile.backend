@@ -1,0 +1,7 @@
+FROM node:18-alpine
+WORKDIR /app
+COPY apps/backend/package.json apps/backend/tsconfig.json ./
+COPY apps/backend/src ./src
+RUN npm install --prefix ./ && npm run build --prefix ./
+EXPOSE 3001
+CMD ["node", "dist/index.js"]

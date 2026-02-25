@@ -1,0 +1,12 @@
+{
+  "regions": ["iad1"],
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_SIGNALING_URL": {
+      "description": "WebSocket signaling server URL",
+      "value": "ws://localhost:3001"
+    }
+  }
+}
