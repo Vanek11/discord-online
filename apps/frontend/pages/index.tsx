@@ -145,23 +145,25 @@ export default function Home() {
     }
 
     pcsRef.current.forEach((pc, peerId) => {
-      stream.getTracks().forEach((track: MediaStreamTrack) => {
-        try {
-          const senders = pc.getSenders();
-          const sender = senders.find((s) => s.track?.kind === track.kind);
-          if (sender) {
-            sender.replaceTrack(track).catch(() => {});
-          } else {
-            pc.addTrack(track, stream);
-          }
-        } catch (e) {
-          pc.addTrack(track, stream);
+  if (!pc || !localStreamRef.current) return;
+    localStreamRef.current.getTracks().forEach((track: MediaStreamTrack) => {
+      try {
+        const senders = pc.getSenders();
+        const sender = senders.find((s) => s.track?.kind === track.kind);
+        if (sender) {
+          sender.replaceTrack(track).catch(() => {});
+        } else {
+          pc.addTrack(track, localStreamRef.current!);
         }
-      });
-      const bitrate = getTargetBitrate(quality, fps);
-      setBitrate(pc, bitrate);
-      monitorStats(pc, peerId);
+      } catch (e) {
+        pc.addTrack(track, localStreamRef.current!);
+      }
     });
+
+  const bitrate = getTargetBitrate(quality, fps);
+  setBitrate(pc, bitrate);
+  monitorStats(pc, peerId);
+});
 
     setSharing(true);
   }
@@ -196,8 +198,10 @@ export default function Home() {
           if (!pcsRef.current.has(peerId)) {
             const pc = createPeerConnection(peerId, ws);
             pcsRef.current.set(peerId, pc);
-            if (localStreamRef.current) {
-              localStreamRef.current.getTracks().forEach((t) => pc.addTrack(t, localStreamRef.current!));
+            if (pc && localStreamRef.current) {
+              if (localStreamRef.current) {
+                localStreamRef.current.getTracks().forEach((t) => pc.addTrack(t, localStreamRef.current as MediaStream));
+              }
             }
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
@@ -216,9 +220,9 @@ export default function Home() {
           if (!pcsRef.current.has(peerId)) {
             const pc = createPeerConnection(peerId, ws);
             pcsRef.current.set(peerId, pc);
-            if (localStreamRef.current) {
-              localStreamRef.current.getTracks().forEach((t) => pc.addTrack(t, localStreamRef.current!));
-            }
+            if (pc && localStreamRef.current) {
+                localStreamRef.current?.getTracks().forEach((t) => pc.addTrack(t, localStreamRef.current as MediaStream | null));
+              }
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
             ws.send(JSON.stringify({ type: 'offer', to: peerId, room, sdp: offer.sdp }));
